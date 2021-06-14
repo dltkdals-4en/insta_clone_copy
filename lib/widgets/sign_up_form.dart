@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:insta_clone/constants/auth_input_decor.dart';
 import 'package:insta_clone/constants/common_size.dart';
 import 'package:insta_clone/home_page.dart';
+
+import 'or_divider.dart';
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({Key key}) : super(key: key);
@@ -40,7 +43,7 @@ class _SignUpFormState extends State<SignUpForm> {
               Image.asset('assets/images/insta_text_logo.png'),
               TextFormField(
                 controller: _emailController,
-                decoration: _inputDecoration('Email'),
+                decoration: inputDecoration('Email'),
                 cursorColor: Colors.black54,
                 validator: (text) {
                   if (text.isNotEmpty && text.contains('@')) {
@@ -55,7 +58,7 @@ class _SignUpFormState extends State<SignUpForm> {
               ),
               TextFormField(
                 controller: _pwController,
-                decoration: _inputDecoration('Password'),
+                decoration: inputDecoration('Password'),
                 cursorColor: Colors.black54,
                 obscureText: true,
                 validator: (text) {
@@ -71,7 +74,7 @@ class _SignUpFormState extends State<SignUpForm> {
               ),
               TextFormField(
                 controller: _cpwController,
-                decoration: _inputDecoration('Confirm Password'),
+                decoration: inputDecoration('Confirm Password'),
                 cursorColor: Colors.black54,
                 obscureText: true,
                 validator: (text) {
@@ -82,51 +85,20 @@ class _SignUpFormState extends State<SignUpForm> {
                   }
                 },
               ),
-              FlatButton(
-                color: Colors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                onPressed: () {
-                  if (_formKey.currentState.validate()) {
-                    print('validation success');
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(
-                      builder: (context) => HomePage(),
-                    ));
-                  }
-                },
-                child: Text(
-                  'Join',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
               SizedBox(
                 height: common_s_gap,
               ),
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    height: 1,
-                    child: Container(
-                      color: Colors.grey[300],
-                      height: 1,
-                    ),
-                  ),
-                  Container(
-                    color: Colors.grey[50],
-                    height: 3,
-                    width: 60,
-                  ),
-                  Text(
-                    'OR',
-                    style: TextStyle(
-                        color: Colors.grey[400], fontWeight: FontWeight.bold),
-                  )
-                ],
-              )
+              _submitButton(context),
+              SizedBox(
+                height: common_s_gap,
+              ),
+              OrDivider(),
+              FlatButton.icon(
+                onPressed: () {},
+                icon: ImageIcon(AssetImage('assets/images/facebook.png')),
+                label: Text('Login with Facebook'),
+                textColor: Colors.blue,
+              ),
             ],
           ),
         ),
@@ -134,31 +106,30 @@ class _SignUpFormState extends State<SignUpForm> {
     );
   }
 
-  InputDecoration _inputDecoration(String hint) {
-    return InputDecoration(
-        hintText: hint,
-        enabledBorder: activeInputBorder(),
-        focusedBorder: activeInputBorder(),
-        errorBorder: errorInputBorder(),
-        focusedErrorBorder: errorInputBorder(),
-        filled: true,
-        fillColor: Colors.grey[100]);
+  FlatButton _submitButton(BuildContext context) {
+    return FlatButton(
+              color: Colors.blue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+              onPressed: () {
+                if (_formKey.currentState.validate()) {
+                  print('validation success');
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    builder: (context) => HomePage(),
+                  ));
+                }
+              },
+              child: Text(
+                'Join',
+                style: TextStyle(color: Colors.white),
+              ),
+            );
   }
 
-  OutlineInputBorder errorInputBorder() {
-    return OutlineInputBorder(
-        borderSide: BorderSide(
-          color: Colors.redAccent,
-        ),
-        borderRadius: BorderRadius.circular(common_s_gap));
-  }
 
-  OutlineInputBorder activeInputBorder() {
-    return OutlineInputBorder(
-      borderSide: BorderSide(
-        color: Colors.grey[300],
-      ),
-      borderRadius: BorderRadius.circular(common_s_gap),
-    );
-  }
+
+
 }
+
+
