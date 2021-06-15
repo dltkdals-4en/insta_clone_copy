@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:insta_clone/repo/user_network_repository.dart';
 import 'package:insta_clone/util/simple_snackbar.dart';
 
 class FirebaseAuthState extends ChangeNotifier {
@@ -9,11 +10,10 @@ class FirebaseAuthState extends ChangeNotifier {
   FirebaseUser _firebaseUser;
   FacebookLogin _facebookLogin;
 
-
   void watchAuthChange() {
     _firebaseAuth.onAuthStateChanged.listen((firebaseUser) {
       if (firebaseUser == null && _firebaseUser == null) {
-          changeFirebaseAuthStatus();
+        changeFirebaseAuthStatus();
 
         return;
       } else if (firebaseUser != _firebaseUser) {
@@ -59,39 +59,51 @@ class FirebaseAuthState extends ChangeNotifier {
   }
 
   void registerUser(BuildContext context,
-      {@required String email, @required String password}) {
+      {@required String email, @required String password}) async {
     changeFirebaseAuthStatus(FirebaseAuthStatus.progress);
-    _firebaseAuth
+    AuthResult authResult = await _firebaseAuth
         .createUserWithEmailAndPassword(
-            email: email.trim(), password: password.trim())
+        email: email.trim(), password: password.trim())
         .catchError((error) {
       print(error);
       String _message = "";
       switch (error.code) {
         case 'ERROR_WEAK_PASSWORD':
-          _message = "패스워드를 잘 넣어줘";
+          _message = "패스워드 잘 넣어줘!!";
           break;
         case 'ERROR_INVALID_EMAIL':
-          _message = "이메일 주소 안맞아";
+          _message = "이멜 주소가 좀 이상해!";
           break;
         case 'ERROR_EMAIL_ALREADY_IN_USE':
-          _message = "다른 이메일 써줘";
+          _message = "해당 이멜은 다른 사람이 쓰고있네??";
           break;
       }
+
       SnackBar snackBar = SnackBar(
         content: Text(_message),
       );
       Scaffold.of(context).showSnackBar(snackBar);
     });
+
+    _firebaseUser = authResult.user;
+    if (_firebaseUser == null) {
+      SnackBar snackBar = SnackBar(
+        content: Text("Please try again later!"),
+      );
+      Scaffold.of(context).showSnackBar(snackBar);
+    } else {
+      await userNetworkRepository.attemptCreateUser(
+          userKey: _firebaseUser.uid, email: _firebaseUser.email);
+    }
   }
 
-  void signOut() async{
+  void signOut() async {
     changeFirebaseAuthStatus(FirebaseAuthStatus.progress);
     _firebaseAuthStatus = FirebaseAuthStatus.signout;
     if (_firebaseUser != null) {
       _firebaseUser = null;
       await _firebaseAuth.signOut();
-      if(await _facebookLogin.isLoggedIn){
+      if (await _facebookLogin.isLoggedIn) {
         await _facebookLogin.logOut();
       }
     }
@@ -100,8 +112,7 @@ class FirebaseAuthState extends ChangeNotifier {
 
   void loginWithFacebook(BuildContext context) async {
     changeFirebaseAuthStatus(FirebaseAuthStatus.progress);
-    if(_facebookLogin==null)
-     _facebookLogin = FacebookLogin();
+    if (_facebookLogin == null) _facebookLogin = FacebookLogin();
     final result = await _facebookLogin.logIn(['email']);
 
     switch (result.status) {
@@ -118,15 +129,18 @@ class FirebaseAuthState extends ChangeNotifier {
     }
   }
 
-  void _handleFacebookTokenWithFirebase(BuildContext context, String token) async{
-    final AuthCredential credential = FacebookAuthProvider.getCredential(accessToken: token);
-    
-    final AuthResult authResult =await _firebaseAuth.signInWithCredential(credential);
-    final FirebaseUser user =authResult.user;
-    
-    if(user == null){
-        simpleSnackbar(context, '로그인 실패');
-    }else{
+  void _handleFacebookTokenWithFirebase(
+      BuildContext context, String token) async {
+    final AuthCredential credential =
+        FacebookAuthProvider.getCredential(accessToken: token);
+
+    final AuthResult authResult =
+        await _firebaseAuth.signInWithCredential(credential);
+    final FirebaseUser user = authResult.user;
+
+    if (user == null) {
+      simpleSnackbar(context, '로그인 실패');
+    } else {
       _firebaseUser = user;
     }
     notifyListeners();

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:insta_clone/repo/user_network_repository.dart';
 import 'package:insta_clone/widgets/post.dart';
 
 class FeedScreen extends StatelessWidget {
@@ -24,9 +25,19 @@ class FeedScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             IconButton(
-              onPressed: () {},
+              onPressed: () {
+
+              },
               icon: ImageIcon(
                 AssetImage('assets/images/actionbar_camera.png'),
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+
+              },
+              icon: ImageIcon(
+                AssetImage('assets/images/direct_message.png'),
               ),
             ),
           ],
