@@ -4,13 +4,17 @@ import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:insta_clone/util/simple_snackbar.dart';
 
 class FirebaseAuthState extends ChangeNotifier {
-  FirebaseAuthStatus _firebaseAuthStatus = FirebaseAuthStatus.signout;
+  FirebaseAuthStatus _firebaseAuthStatus = FirebaseAuthStatus.progress;
   FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   FirebaseUser _firebaseUser;
+  FacebookLogin _facebookLogin;
+
 
   void watchAuthChange() {
     _firebaseAuth.onAuthStateChanged.listen((firebaseUser) {
       if (firebaseUser == null && _firebaseUser == null) {
+          changeFirebaseAuthStatus();
+
         return;
       } else if (firebaseUser != _firebaseUser) {
         _firebaseUser = firebaseUser;
@@ -21,6 +25,7 @@ class FirebaseAuthState extends ChangeNotifier {
 
   void login(BuildContext context,
       {@required String email, @required String password}) {
+    changeFirebaseAuthStatus(FirebaseAuthStatus.progress);
     _firebaseAuth
         .signInWithEmailAndPassword(
             email: email.trim(), password: password.trim())
@@ -55,6 +60,7 @@ class FirebaseAuthState extends ChangeNotifier {
 
   void registerUser(BuildContext context,
       {@required String email, @required String password}) {
+    changeFirebaseAuthStatus(FirebaseAuthStatus.progress);
     _firebaseAuth
         .createUserWithEmailAndPassword(
             email: email.trim(), password: password.trim())
@@ -79,18 +85,24 @@ class FirebaseAuthState extends ChangeNotifier {
     });
   }
 
-  void signOut() {
+  void signOut() async{
+    changeFirebaseAuthStatus(FirebaseAuthStatus.progress);
     _firebaseAuthStatus = FirebaseAuthStatus.signout;
     if (_firebaseUser != null) {
       _firebaseUser = null;
-      _firebaseAuth.signOut();
+      await _firebaseAuth.signOut();
+      if(await _facebookLogin.isLoggedIn){
+        await _facebookLogin.logOut();
+      }
     }
     notifyListeners();
   }
 
   void loginWithFacebook(BuildContext context) async {
-    final facebookLogin = FacebookLogin();
-    final result = await facebookLogin.logIn(['email']);
+    changeFirebaseAuthStatus(FirebaseAuthStatus.progress);
+    if(_facebookLogin==null)
+     _facebookLogin = FacebookLogin();
+    final result = await _facebookLogin.logIn(['email']);
 
     switch (result.status) {
       case FacebookLoginStatus.loggedIn:
@@ -101,7 +113,7 @@ class FirebaseAuthState extends ChangeNotifier {
         break;
       case FacebookLoginStatus.error:
         simpleSnackbar(context, 'Error while facebook sign in');
-        facebookLogin.logOut();
+        _facebookLogin.logOut();
         break;
     }
   }
