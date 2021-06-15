@@ -1,13 +1,25 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:insta_clone/models/firestore/user_model.dart';
 
-class UserModelState extends ChangeNotifier{
+class UserModelState extends ChangeNotifier {
   UserModel _userModel;
-
+  StreamSubscription<UserModel> _currentStreamSub;
   UserModel get userModel => _userModel;
+  StreamSubscription<UserModel> get currentStreamSub => _currentStreamSub;
 
-  set userModel(UserModel userModel){
+  set userModel(UserModel userModel) {
     _userModel = userModel;
     notifyListeners();
+  }
+
+  set currentStreamSub(StreamSubscription<UserModel> currentStreamSub) =>
+      _currentStreamSub = currentStreamSub;
+
+  clear() async {
+    if (_currentStreamSub != null) await _currentStreamSub.cancel();
+    _currentStreamSub = null;
+    _userModel = null;
   }
 }

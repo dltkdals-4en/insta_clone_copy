@@ -13,8 +13,8 @@ class UserModel {
   final DocumentReference reference;
 
   UserModel.fromMap(Map<String, dynamic> map, this.userKey, {this.reference})
-      : profileImg = map[KEY_PROFILEIMG],
-        username = map[KEY_USERNAME],
+      : username = map[KEY_USERNAME],
+        profileImg = map[KEY_PROFILEIMG],
         email = map[KEY_EMAIL],
         likedPosts = map[KEY_LIKEDPOSTS],
         followers = map[KEY_FOLLOWERS],
@@ -25,7 +25,7 @@ class UserModel {
       : this.fromMap(snapshot.data, snapshot.documentID,
             reference: snapshot.reference);
 
-  static Map<String, dynamic> getMapForCreateUser(String email){
+  static Map<String, dynamic> getMapForCreateUser(String email) {
     Map<String, dynamic> map = Map();
     map[KEY_PROFILEIMG] = "";
     map[KEY_USERNAME] = email.split("@")[0];
