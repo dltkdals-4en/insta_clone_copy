@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:insta_clone/constants/auth_input_decor.dart';
 import 'package:insta_clone/constants/common_size.dart';
 import 'package:insta_clone/home_page.dart';
+import 'package:insta_clone/models/fire_base_auth_state.dart';
+import 'package:provider/provider.dart';
 
 import 'or_divider.dart';
 
@@ -94,7 +96,10 @@ class _SignUpFormState extends State<SignUpForm> {
               ),
               OrDivider(),
               FlatButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  Provider.of<FirebaseAuthState>(context, listen: false)
+                      .changeFirebaseAuthStatus(FirebaseAuthStatus.signin);
+                },
                 icon: ImageIcon(AssetImage('assets/images/facebook.png')),
                 label: Text('Login with Facebook'),
                 textColor: Colors.blue,
@@ -108,28 +113,21 @@ class _SignUpFormState extends State<SignUpForm> {
 
   FlatButton _submitButton(BuildContext context) {
     return FlatButton(
-              color: Colors.blue,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
-              onPressed: () {
-                if (_formKey.currentState.validate()) {
-                  print('validation success');
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(
-                    builder: (context) => HomePage(),
-                  ));
-                }
-              },
-              child: Text(
-                'Join',
-                style: TextStyle(color: Colors.white),
-              ),
-            );
+      color: Colors.blue,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(6),
+      ),
+      onPressed: () {
+        if (_formKey.currentState.validate()) {
+          print('validation success');
+          Provider.of<FirebaseAuthState>(context, listen: false).registerUser(
+            context, email: _emailController.text, password: _pwController.text);
+        }
+      },
+      child: Text(
+        'Join',
+        style: TextStyle(color: Colors.white),
+      ),
+    );
   }
-
-
-
-
 }
-
-
