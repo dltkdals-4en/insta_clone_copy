@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 
 import 'package:insta_clone/constants/screen_size.dart';
 import 'package:insta_clone/models/camera_state.dart';
+import 'package:insta_clone/models/user_model_state.dart';
+import 'package:insta_clone/repo/helper/generate_post_key.dart';
 import 'package:insta_clone/screens/share_post_screen.dart';
 import 'package:insta_clone/widgets/my_progress_indicator.dart';
 import 'package:path/path.dart';
@@ -69,10 +71,10 @@ class _TakePhotoState extends State<TakePhoto> {
   }
 
   void _attemptTakePhoto(CameraState cameraState, BuildContext context) async {
-    final String timeInMilli = DateTime.now().millisecondsSinceEpoch.toString();
+    final String postKey =
+        getNewPostKey(Provider.of<UserModelState>(context, listen: false).userModel);
     try {
-      final path =
-          join((await getTemporaryDirectory()).path, '$timeInMilli.png');
+      final path = join((await getTemporaryDirectory()).path, '$postKey.png');
 
       await cameraState.controller.takePicture(path);
 
@@ -80,6 +82,7 @@ class _TakePhotoState extends State<TakePhoto> {
       Navigator.of(context).push(MaterialPageRoute(
           builder: (_) => SharePostScreen(
                 imageFile,
+                postKey: postKey,
               )));
     } catch (e) {}
   }
