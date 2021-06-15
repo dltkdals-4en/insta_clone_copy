@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:insta_clone/util/simple_snackbar.dart';
 
 class FirebaseAuthState extends ChangeNotifier {
   FirebaseAuthStatus _firebaseAuthStatus = FirebaseAuthStatus.signout;
@@ -17,9 +19,11 @@ class FirebaseAuthState extends ChangeNotifier {
     });
   }
 
-  void login(BuildContext context,{@required String email, @required String password}) {
+  void login(BuildContext context,
+      {@required String email, @required String password}) {
     _firebaseAuth
-        .signInWithEmailAndPassword(email: email.trim(), password: password.trim())
+        .signInWithEmailAndPassword(
+            email: email.trim(), password: password.trim())
         .catchError((error) {
       String _message = "";
       switch (error.code) {
@@ -83,9 +87,39 @@ class FirebaseAuthState extends ChangeNotifier {
     }
     notifyListeners();
   }
-  void lobinWithFacebook(BuildContext context){
-    
+
+  void loginWithFacebook(BuildContext context) async {
+    final facebookLogin = FacebookLogin();
+    final result = await facebookLogin.logIn(['email']);
+
+    switch (result.status) {
+      case FacebookLoginStatus.loggedIn:
+        _handleFacebookTokenWithFirebase(context, result.accessToken.token);
+        break;
+      case FacebookLoginStatus.cancelledByUser:
+        simpleSnackbar(context, 'User cancel facebook sign in');
+        break;
+      case FacebookLoginStatus.error:
+        simpleSnackbar(context, 'Error while facebook sign in');
+        facebookLogin.logOut();
+        break;
+    }
   }
+
+  void _handleFacebookTokenWithFirebase(BuildContext context, String token) async{
+    final AuthCredential credential = FacebookAuthProvider.getCredential(accessToken: token);
+    
+    final AuthResult authResult =await _firebaseAuth.signInWithCredential(credential);
+    final FirebaseUser user =authResult.user;
+    
+    if(user == null){
+        simpleSnackbar(context, '로그인 실패');
+    }else{
+      _firebaseUser = user;
+    }
+    notifyListeners();
+  }
+
   void changeFirebaseAuthStatus([FirebaseAuthStatus firebaseAuthStatus]) {
     if (firebaseAuthStatus != null) {
       _firebaseAuthStatus = firebaseAuthStatus;
