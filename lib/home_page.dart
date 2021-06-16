@@ -2,11 +2,14 @@ import 'dart:io';
 
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:insta_clone/models/user_model_state.dart';
 import 'package:insta_clone/screens/camera_screen.dart';
 import 'package:insta_clone/screens/feed_screen.dart';
 import 'package:insta_clone/screens/profile_screen.dart';
 import 'package:insta_clone/screens/search_screen.dart';
+import 'package:insta_clone/widgets/my_progress_indicator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
 import 'constants/screen_size.dart';
 
@@ -43,7 +46,19 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
   static List<Widget> _screens = <Widget>[
-    FeedScreen(),
+    Consumer<UserModelState>(
+      builder:
+          (BuildContext context, UserModelState userModelState, Widget child) {
+        if (userModelState == null ||
+            userModelState.userModel == null ||
+            userModelState.userModel.followings == null ||
+            userModelState.userModel.followings.isEmpty) {
+          return MyProgressIndicator();
+        }else {
+          return FeedScreen(userModelState.userModel.followings);
+        }
+      },
+    ),
     SearchScreen(),
     Container(
       color: Colors.greenAccent,
@@ -113,7 +128,7 @@ class _HomePageState extends State<HomePage> {
     Map<Permission, PermissionStatus> statuses = await [
       Permission.camera,
       Permission.microphone,
-      Platform.isIOS?Permission.photos:Permission.storage,
+      Platform.isIOS ? Permission.photos : Permission.storage,
     ].request();
     bool permitted = true;
 

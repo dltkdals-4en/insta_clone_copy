@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:insta_clone/constants/firestore_keys.dart';
+import 'package:insta_clone/models/firestore/post_model.dart';
+import 'package:insta_clone/repo/helper/transformers.dart';
+import 'package:rxdart/streams.dart';
 
-class PostNetworkRepository {
+class PostNetworkRepository with Transformers {
   Future<Map<String, dynamic>> createNewPost(
       String postKey, Map<String, dynamic> postData) async {
     final DocumentReference postRef =
@@ -26,8 +29,50 @@ class PostNetworkRepository {
         Firestore.instance.collection(COLLECTION_POSTS).document(postKey);
     final DocumentSnapshot postSnapshot = await postRef.get();
     if (postSnapshot.exists) {
-       await postRef.updateData({KEY_POSTIMG: postImg});
-      
+      await postRef.updateData({KEY_POSTIMG: postImg});
+    }
+  }
+
+  Stream<List<PostModel>> getPostFromSpecificUser(String userKey) {
+    return Firestore.instance
+        .collection(COLLECTION_POSTS)
+        .where(KEY_USERKEY, isEqualTo: userKey)
+        .snapshots()
+        .transform(toPosts);
+  }
+
+  Stream<List<PostModel>> fetchPostsFromAllFollowers(List<dynamic> followings) {
+    final CollectionReference collectionReference =
+        Firestore.instance.collection(COLLECTION_POSTS);
+
+    List<Stream<List<PostModel>>> streams = [];
+
+    for (final followings in followings) {
+      streams.add(collectionReference
+          .where(KEY_USERKEY, isEqualTo: followings)
+          .snapshots()
+          .transform(toPosts));
+    }
+    return CombineLatestStream.list<List<PostModel>>(streams)
+        .transform(combineListOfPosts)
+        .transform(latestToTop);
+  }
+
+  Future<void> toggleLike(String postKey, String userKey) async {
+    final DocumentReference postRef =
+        Firestore.instance.collection(COLLECTION_POSTS).document(postKey);
+    final DocumentSnapshot postSnapshot = await postRef.get();
+
+    if (postSnapshot.exists) {
+      if (postSnapshot.data[KEY_NUMOFLIKES].contains(userKey)) {
+        postRef.updateData({
+          KEY_NUMOFLIKES: FieldValue.arrayRemove([userKey])
+        });
+      } else {
+        postRef.updateData({
+          KEY_NUMOFLIKES: FieldValue.arrayUnion([userKey])
+        });
+      }
     }
   }
 }

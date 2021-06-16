@@ -58,7 +58,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                amIFollowing ? 'following' : 'unfollow',
+                                amIFollowing ? 'unfollow' : 'follow',
                                 style: TextStyle(fontWeight: FontWeight.bold),
                                 textAlign: TextAlign.center,
                               ),

@@ -6,11 +6,11 @@ class Comment extends StatelessWidget {
   final bool showImage;
   final String username;
   final String text;
-  final DateTime datetime;
+  final DateTime dateTime;
 
   Comment({
     Key key,
-    this.showImage = true, @required this.username, @required this.text, this.datetime,
+    this.showImage = true, @required this.username, @required this.text, this.dateTime,
   }) : super(key: key);
 
   @override
@@ -44,9 +44,9 @@ class Comment extends StatelessWidget {
                 ],
               ),
             ),
-            if(datetime != null)
+            if(dateTime != null)
             Text(
-              datetime.toString(),
+              dateTime.toString(),
               style: TextStyle(
                 color: Colors.grey[400],
                 fontSize: 10,

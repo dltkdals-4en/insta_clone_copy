@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:insta_clone/models/firestore/comment_model.dart';
+import 'package:insta_clone/models/firestore/post_model.dart';
 import 'package:insta_clone/models/firestore/user_model.dart';
 
 class Transformers {
@@ -22,4 +24,44 @@ class Transformers {
 
     sink.add(users);
   });
+  final toPosts =
+      StreamTransformer<QuerySnapshot, List<PostModel>>.fromHandlers(
+          handleData: (snapshot, sink) async {
+    List<PostModel> posts = [];
+
+    snapshot.documents.forEach((documentSnapshot) {
+      posts.add(PostModel.fromSnapshot(documentSnapshot));
+    });
+
+    sink.add(posts);
+  });
+  final latestToTop =
+      StreamTransformer<List<PostModel>, List<PostModel>>.fromHandlers(
+          handleData: (posts, sink) async {
+    posts.sort((a, b) => b.postTime.compareTo(a.postTime));
+
+    sink.add(posts);
+  });
+  final combineListOfPosts =
+      StreamTransformer<List<List<PostModel>>, List<PostModel>>.fromHandlers(
+          handleData: (listOfPosts, sink) async {
+    List<PostModel> posts = [];
+
+    for(final postList in listOfPosts){
+      posts.addAll(postList);
+    }
+
+    sink.add(posts);
+  });
+  final toComments =
+  StreamTransformer<QuerySnapshot, List<CommentModel>>.fromHandlers(
+      handleData: (snapshot, sink) async {
+        List<CommentModel> comments = [];
+
+        snapshot.documents.forEach((documentSnapshot) {
+          comments.add(CommentModel.fromSnapshot(documentSnapshot));
+        });
+
+        sink.add(comments);
+      });
 }
