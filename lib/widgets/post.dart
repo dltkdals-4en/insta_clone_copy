@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:insta_clone/constants/common_size.dart';
 import 'package:insta_clone/constants/screen_size.dart';
+import 'package:insta_clone/repo/image_network_repository.dart';
 import 'package:insta_clone/widgets/my_progress_indicator.dart';
 import 'package:insta_clone/widgets/rounded_avatar.dart';
 
@@ -10,7 +11,6 @@ import 'comment.dart';
 class Post extends StatelessWidget {
   final int index;
 
-
   Post(
     this.index, {
     Key key,
@@ -18,8 +18,6 @@ class Post extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -104,24 +102,36 @@ class Post extends StatelessWidget {
     );
   }
 
-  CachedNetworkImage _postImage() {
-    return CachedNetworkImage(
-      imageUrl: 'https://picsum.photos/id/$index/200/200',
-      placeholder: (BuildContext context, String url) {
-        return MyProgressIndicator(
-          containerSize: size.width,
-        );
-      },
-      imageBuilder: (BuildContext context, ImageProvider imageProvider) {
-        return AspectRatio(
-          aspectRatio: 1,
-          child: Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
-            ),
-          ),
-        );
-      },
+  Widget _postImage() {
+    Widget progress = MyProgressIndicator(
+      containerSize: size.width,
     );
+    return FutureBuilder<dynamic>(
+        future: imageNetworkRepository
+            .getPostImageUrl('1623806728705_dv82K69i8KXTC4NmmvV168wIg042'),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return CachedNetworkImage(
+              imageUrl: snapshot.data.toString(),
+              placeholder: (BuildContext context, String url) {
+                return progress;
+              },
+              imageBuilder:
+                  (BuildContext context, ImageProvider imageProvider) {
+                return AspectRatio(
+                  aspectRatio: 1,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: imageProvider, fit: BoxFit.cover),
+                    ),
+                  ),
+                );
+              },
+            );
+          } else {
+            return progress;
+          }
+        });
   }
 }
