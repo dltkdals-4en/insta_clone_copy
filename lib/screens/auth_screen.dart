@@ -18,7 +18,7 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   void initState() {
     if (currentWidget == null) {
-      currentWidget = signUpForm;
+      currentWidget = signInForm;
     }
     super.initState();
   }

@@ -31,7 +31,7 @@ class CommentNetworkRepository with Transformers {
     return Firestore.instance.collection(COLLECTION_POSTS)
         .document(postKey)
         .collection(COLLECTION_COMMENTS)
-        .orderBy(KEY_COMMENTTIME).snapshots().transform(toComments);
+        .orderBy(KEY_COMMENTTIME, descending: true).snapshots().transform(toComments);
   }
 }
 CommentNetworkRepository commentNetworkRepository =CommentNetworkRepository();
