@@ -27,7 +27,7 @@ class FirebaseAuthState extends ChangeNotifier {
     changeFirebaseAuthStatus(FirebaseAuthStatus.progress);
     AuthResult authResult = await _firebaseAuth
         .createUserWithEmailAndPassword(
-        email: email.trim(), password: password.trim())
+            email: email.trim(), password: password.trim())
         .catchError((error) {
       print(error);
       String _message = "";
@@ -66,7 +66,7 @@ class FirebaseAuthState extends ChangeNotifier {
     changeFirebaseAuthStatus(FirebaseAuthStatus.progress);
     AuthResult authResult = await _firebaseAuth
         .signInWithEmailAndPassword(
-        email: email.trim(), password: password.trim())
+            email: email.trim(), password: password.trim())
         .catchError((error) {
       print(error);
       String _message = "";
@@ -156,10 +156,10 @@ class FirebaseAuthState extends ChangeNotifier {
   void _handleFacebookTokenWithFirebase(
       BuildContext context, String token) async {
     final AuthCredential credential =
-    FacebookAuthProvider.getCredential(accessToken: token);
+        FacebookAuthProvider.getCredential(accessToken: token);
 
     final AuthResult authResult =
-    await _firebaseAuth.signInWithCredential(credential);
+        await _firebaseAuth.signInWithCredential(credential);
 
     _firebaseUser = authResult.user;
     if (_firebaseUser == null) {
@@ -172,6 +172,7 @@ class FirebaseAuthState extends ChangeNotifier {
   }
 
   FirebaseAuthStatus get firebaseAuthStatus => _firebaseAuthStatus;
+
   FirebaseUser get firebaseUser => _firebaseUser;
 }
 
